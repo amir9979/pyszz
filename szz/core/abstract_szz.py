@@ -268,7 +268,8 @@ class AbstractSZZ(ABC):
     def __cleanup_repo(self):
         """ Cleanup of local repository used by SZZ """
         if os.path.isdir(self.__temp_dir):
-            rmtree(self.__temp_dir)
+            self.set_rw(lambda *args: None, self.__temp_dir, None)
+            rmtree(self.__temp_dir, onerror=self.set_rw)
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """
