@@ -4,8 +4,8 @@ from typing import List, Set
 
 from git import Commit
 
-from .core.abstract_szz import ImpactedFile
-from .ma_szz import MASZZ
+from ..szz.core.abstract_szz import ImpactedFile
+from ..szz.ma_szz import MASZZ
 
 
 class RSZZ(MASZZ):
