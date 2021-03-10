@@ -1,5 +1,5 @@
-from szz.core.abstract_szz import AbstractSZZ, ImpactedFile
-from szz.core.comment_parser import parse_comments
+from ..szz.core.abstract_szz import AbstractSZZ, ImpactedFile
+from ..szz.core.comment_parser import parse_comments
 
 
 """ test python comment parser """

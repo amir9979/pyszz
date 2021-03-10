@@ -4,7 +4,7 @@ from typing import List, Set
 
 from git import Commit
 
-from szz.core.abstract_szz import AbstractSZZ, ImpactedFile
+from .core.abstract_szz import AbstractSZZ, ImpactedFile
 
 
 class BaseSZZ(AbstractSZZ):

@@ -1,6 +1,7 @@
 import logging as log
 import ntpath
 import os
+import stat
 from abc import ABC, abstractmethod
 from shutil import copytree
 from enum import Enum
@@ -65,8 +66,8 @@ class AbstractSZZ(ABC):
 
     def __del__(self):
         log.info("cleanup objects...")
-        self.__cleanup_repo()
         self.__clear_gitpython()
+        self.__cleanup_repo()
 
     @property
     def repository(self) -> Repo:
@@ -265,11 +266,15 @@ class AbstractSZZ(ABC):
         self.repository.head.reset(commit=commit, index=True, working_tree=True)
         assert not self.repository.head.is_detached
 
+    def del_rw(self, action, name, exc):
+        os.chmod(name, stat.S_IWRITE)
+        return True
+
     def __cleanup_repo(self):
         """ Cleanup of local repository used by SZZ """
         if os.path.isdir(self.__temp_dir):
-            self.set_rw(lambda *args: None, self.__temp_dir, None)
-            rmtree(self.__temp_dir, onerror=self.set_rw)
+            self.del_rw(lambda *args: None, self.__temp_dir, None)
+            rmtree(self.__temp_dir, onerror=self.del_rw)
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """

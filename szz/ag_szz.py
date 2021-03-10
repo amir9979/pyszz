@@ -5,7 +5,7 @@ from time import time as ts
 from git import Commit
 from pydriller import RepositoryMining
 
-from szz.core.abstract_szz import AbstractSZZ, ImpactedFile
+from .core.abstract_szz import AbstractSZZ, ImpactedFile
 
 
 class AGSZZ(AbstractSZZ):

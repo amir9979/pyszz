@@ -7,12 +7,12 @@ from time import time as ts
 
 import yaml
 
-from szz.ag_szz import AGSZZ
-from szz.b_szz import BaseSZZ
-from szz.l_szz import LSZZ
-from szz.ma_szz import MASZZ, DetectLineMoved
-from szz.r_szz import RSZZ
-from szz.ra_szz import RASZZ
+from .szz.ag_szz import AGSZZ
+from .szz.b_szz import BaseSZZ
+from .szz.l_szz import LSZZ
+from .szz.ma_szz import MASZZ, DetectLineMoved
+from .szz.r_szz import RSZZ
+from .szz.ra_szz import RASZZ
 
 log.basicConfig(level=log.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s')
 log.getLogger('pydriller').setLevel(log.WARNING)
