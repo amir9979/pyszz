@@ -28,15 +28,12 @@ class RASZZ(MASZZ):
         for commit in commits:
             if not commit in refactorings:
                 log.info(f'Running RefMiner on {commit}')
-                p = subprocess.Popen([PATH_TO_REFMINER, "-c", self._repository_path, commit], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                command = [PATH_TO_REFMINER, "-c", self._repository_path, commit]
+                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 err = p.stderr.read()
                 out = p.stdout.read()
                 if err:
                     log.error(err)
-                    continue
-                if len(out) == 0:
-                    log.error("Ouptut is empty")
-                    continue
                 refactorings[commit] = json.loads(out)
                     
         return refactorings
