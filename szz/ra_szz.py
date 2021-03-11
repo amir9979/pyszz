@@ -3,7 +3,7 @@ import tempfile
 import json
 import os
 import logging as log
-
+import subprocess
 from typing import List, Set
 from git import Commit
 from ..szz.ma_szz import MASZZ
@@ -27,10 +27,17 @@ class RASZZ(MASZZ):
         refactorings = dict()
         for commit in commits:
             if not commit in refactorings:
-                with tempfile.NamedTemporaryFile(mode='r+') as tmpfile:
-                    log.info(f'Running RefMiner on {commit}')
-                    os.system(f'"{PATH_TO_REFMINER}" -c "{self._repository_path}" {commit} > {tmpfile.name}')
-                    refactorings[commit] = json.loads(tmpfile.read())
+                log.info(f'Running RefMiner on {commit}')
+                p = subprocess.Popen([PATH_TO_REFMINER, "-c", self._repository_path, commit], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                err = p.stderr.read()
+                out = p.stdout.read()
+                if err:
+                    log.error(err)
+                    continue
+                if len(out) == 0:
+                    log.error("Ouptut is empty")
+                    continue
+                refactorings[commit] = json.loads(out)
                     
         return refactorings
     
