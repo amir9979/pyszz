@@ -7,7 +7,7 @@ import logging as log
 from typing import List, Set
 from git import Commit
 from ..szz.ma_szz import MASZZ
-from options import Options
+from ..options import Options
 
 
 class RASZZ(MASZZ):
