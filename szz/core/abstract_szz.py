@@ -48,7 +48,7 @@ class AbstractSZZ(ABC):
         :param str repo_url: url of the Git repository to clone
         :param str repos_dir: temp folder where to clone the given repo
         """
-
+        self.max_file_modifications: int = 50 # max lines that are changed in a file; Beware modifications are counted as 2 (addition + removal)
         self.__temp_dir = mkdtemp(dir=os.getcwd())
         self._repository_path = os.path.join(self.__temp_dir, repo_full_name.replace('/', '_'))
         if not os.path.isdir(self._repository_path):
@@ -139,7 +139,10 @@ class AbstractSZZ(ABC):
                 mod_lines = lines_deleted
             else:
                 mod_lines = [ld for ld in lines_deleted if ld in lines_added]
-
+            
+            if len(mod_lines) > self.max_file_modifications:
+                log.warning("File changes too large")
+                continue
             if len(mod_lines) > 0:
                 impacted_files.append(ImpactedFile(file_path, mod_lines))
 
@@ -267,13 +270,17 @@ class AbstractSZZ(ABC):
         assert not self.repository.head.is_detached
 
     def del_rw(self, action, name, exc):
-        os.chmod(name, stat.S_IWRITE)
-        return True
+        if not os.access(name, os.W_OK):
+        # Is the error an access error ?
+            os.chmod(name, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+            action(name)
+        else:
+            raise AttributeError("Not able to remove. Access denied.")
 
     def __cleanup_repo(self):
         """ Cleanup of local repository used by SZZ """
         if os.path.isdir(self.__temp_dir):
-            self.del_rw(lambda *args: None, self.__temp_dir, None)
+            #self.del_rw(lambda *args: None, self.__temp_dir, None)
             rmtree(self.__temp_dir, onerror=self.del_rw)
 
     def __clear_gitpython(self):
