@@ -29,13 +29,15 @@ class RASZZ(MASZZ):
             if not commit in refactorings:
                 log.info(f'Running RefMiner on {commit}')
                 command = [PATH_TO_REFMINER, "-c", self._repository_path, commit]
-                p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                err = p.stderr.read()
-                out = p.stdout.read()
-                if err:
-                    log.error(err)
-                refactorings[commit] = json.loads(out)
-                    
+                try:
+                    out = subprocess.check_output(command, stderr=subprocess.DEVNULL, timeout=300)
+                    refactorings[commit] = json.loads(out.decode('utf-8'))                 
+                #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                except subprocess.CalledProcessError as e:
+                    log.error(e)
+                except subprocess.TimeoutExpired as e:
+                    log.error("Command timed out: {}".format(e))
+                    refactorings[commit] = {"commits": [{"refactorings": []}]}
         return refactorings
     
     def get_impacted_files(self, fix_commit_hash: str,
