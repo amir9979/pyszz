@@ -31,13 +31,18 @@ class RASZZ(MASZZ):
                 command = [PATH_TO_REFMINER, "-c", self._repository_path, commit]
                 try:
                     out = subprocess.check_output(command, stderr=subprocess.DEVNULL, timeout=300)
-                    refactorings[commit] = json.loads(out.decode('utf-8'))                 
-                #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    data = json.loads(out.decode('utf-8')) 
+                    if 'commits' in data and len(data['commits']) > 0 and 'refactorings' in data['commits'][0]:
+                        refactorings[commit] = data['commits'][0]['refactorings'] 
+                    else:
+                        log.info("Refactoring format corrupted for commit: {}".format(commit))
+                        refactorings[commit] = []
+                    #p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 except subprocess.CalledProcessError as e:
                     log.error(e)
                 except subprocess.TimeoutExpired as e:
                     log.error("Command timed out: {}".format(e))
-                    refactorings[commit] = {"commits": [{"refactorings": []}]}
+                    refactorings[commit] = []
         return refactorings
     
     def get_impacted_files(self, fix_commit_hash: str,
@@ -47,7 +52,7 @@ class RASZZ(MASZZ):
         
         fix_refactorings = self._extract_refactorings([fix_commit_hash])
         
-        for refactoring in fix_refactorings[fix_commit_hash]['commits'][0]['refactorings']:
+        for refactoring in fix_refactorings[fix_commit_hash]:
             for location in refactoring['rightSideLocations']:
                 file_path = location['filePath']
                 from_line = location['startLine']
@@ -96,7 +101,7 @@ class RASZZ(MASZZ):
         result_blame_data = set()
         for blame in candidate_blame_data:
             can_add = True
-            for refactoring in blame_refactorings[blame.commit.hexsha]['commits'][0]['refactorings']:
+            for refactoring in blame_refactorings[blame.commit.hexsha]:
                 for location in refactoring['rightSideLocations']:
                     file_path = location['filePath']
                     from_line = location['startLine']
