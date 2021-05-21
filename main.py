@@ -4,15 +4,15 @@ import os
 import sys
 import dateparser
 from time import time as ts
-
+from datetime import datetime
 import yaml
 
-from .szz.ag_szz import AGSZZ
-from .szz.b_szz import BaseSZZ
-from .szz.l_szz import LSZZ
-from .szz.ma_szz import MASZZ, DetectLineMoved
-from .szz.r_szz import RSZZ
-from .szz.ra_szz import RASZZ
+from ag_szz import AGSZZ
+from b_szz import BaseSZZ
+from l_szz import LSZZ
+from ma_szz import MASZZ, DetectLineMoved
+from r_szz import RSZZ
+from ra_szz import RASZZ
 
 log.basicConfig(level=log.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s')
 log.getLogger('pydriller').setLevel(log.WARNING)
@@ -34,8 +34,8 @@ def main(input_json: str, out_json: str, conf: dict(), repos_dir: str):
         commit_issue_date = None
         if 'earliest_issue_date' in commit or 'best_scenario_issue_date' in commit:
             earliest_issue_date = commit['earliest_issue_date'] if 'earliest_issue_date' in commit else commit['best_scenario_issue_date']
-            commit_issue_date = (earliest_issue_date or best_scenario_issue_date) + " UTC"
-            commit_issue_date = dateparser.parse(commit_issue_date).timestamp()
+            commit_issue_date = (earliest_issue_date or best_scenario_issue_date)
+            commit_issue_date = datetime.strptime(commit_issue_date, '%Y-%m-%dT%H:%M:%SZ').timestamp()
         
         szz_name = conf['szz_name']
         if szz_name == 'b':
