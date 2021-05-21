@@ -10,7 +10,7 @@ from typing import List, Set
 from tempfile import mkdtemp
 
 from git import Commit, Repo
-from pydriller import ModificationType, GitRepository as PyDrillerGitRepo
+from pydriller import ModificationType, Git as PyDrillerGitRepo
 
 from .comment_parser import parse_comments
 

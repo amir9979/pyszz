@@ -4,8 +4,8 @@ from time import time as ts
 from git import Commit
 from pydriller import Repository, ModificationType
 
-from ..szz.ag_szz import AGSZZ
-from ..szz.core.abstract_szz import ImpactedFile, DetectLineMoved
+from ag_szz import AGSZZ
+from core.abstract_szz import ImpactedFile, DetectLineMoved
 
 
 class MASZZ(AGSZZ):
