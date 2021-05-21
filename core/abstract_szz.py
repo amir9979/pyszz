@@ -49,7 +49,7 @@ class AbstractSZZ(ABC):
         :param str repos_dir: temp folder where to clone the given repo
         """
         self.max_file_modifications: int = 50 # max lines that are changed in a file; Beware modifications are counted as 2 (addition + removal)
-        self.__temp_dir = mkdtemp(dir=os.getcwd())
+        self.__temp_dir = os.path.join(repos_dir, repo_full_name)
         self._repository_path = os.path.join(self.__temp_dir, repo_full_name.replace('/', '_'))
         if not os.path.isdir(self._repository_path):
             if repos_dir:
@@ -281,9 +281,9 @@ class AbstractSZZ(ABC):
 
     def __cleanup_repo(self):
         """ Cleanup of local repository used by SZZ """
-        if os.path.isdir(self.__temp_dir):
-            #self.del_rw(lambda *args: None, self.__temp_dir, None)
-            rmtree(self.__temp_dir, onerror=self.del_rw)
+        # if os.path.isdir(self.__temp_dir):
+        #     #self.del_rw(lambda *args: None, self.__temp_dir, None)
+        #     rmtree(self.__temp_dir, onerror=self.del_rw)
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """
