@@ -21,12 +21,13 @@ class AGSZZ(AbstractSZZ):
         repo_mining = Repository(self.repository_path, to_commit=commit_hash, order='reverse').traverse_commits()
         for commit in repo_mining:
             try:
-                if len(commit.modifications) > max_change_size:
+                if len(commit.modified_files) > max_change_size:
                     to_exclude.add(commit.hash)
                 else:
                     break
             except Exception as e:
                 log.error(f'unable to analyze commit: {self.repository_path} {commit.hash}')
+                raise e
 
         if len(to_exclude) > 0:
             log.info(f'count of commits excluded by change size > {max_change_size}: {len(to_exclude)}')
@@ -45,7 +46,8 @@ class AGSZZ(AbstractSZZ):
                     skip_comments=True,
                     **kwargs
                 )
-            except:
+            except Exception as e:
+                raise e
                 print(traceback.format_exc())
 
         return blame_data

@@ -44,8 +44,14 @@ def parse_comments_srcml(file_str: str, file_name: str, temp_folder: str = tempf
         if status == 0:
             for line in process_out:
                 if line.strip().startswith("<comment"):
-                    line_comment_ranges.append(CommentRange(start=int(re.search('pos:start="(\d+):', line).groups()[0]),
-                                                            end=int(re.search('pos:end="(\d+):', line).groups()[0])))
+                    #inline comment
+                    g = re.search('pos:line="(\d+)"', line)
+                    if g:
+                        line = int(g.groups()[0])
+                        line_comment_ranges.append(CommentRange(start=line, end=line))
+                    else:
+                        line_comment_ranges.append(CommentRange(start=int(re.search('pos:start="(\d+):', line).groups()[0]),
+                                                                end=int(re.search('pos:end="(\d+):', line).groups()[0])))
         else:
             log.error(process_out)
 

@@ -41,7 +41,7 @@ class MASZZ(AGSZZ):
                 meta_changes.add(commit.hash)
             else:
                 try:
-                    for m in commit.modifications:
+                    for m in commit.modified_files:
                         if (current_file == m.new_path or current_file == m.old_path) and (m.change_type in self.change_types_to_ignore):
                             log.info(f'exclude meta-change ({m.change_type}): {current_file} {commit.hash}')
                             meta_changes.add(commit.hash)
