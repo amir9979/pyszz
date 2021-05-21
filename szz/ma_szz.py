@@ -2,7 +2,7 @@ import logging as log
 from typing import List, Set
 from time import time as ts
 from git import Commit
-from pydriller import RepositoryMining, ModificationType
+from pydriller import Repository, ModificationType
 
 from ..szz.ag_szz import AGSZZ
 from ..szz.core.abstract_szz import ImpactedFile, DetectLineMoved
@@ -33,7 +33,7 @@ class MASZZ(AGSZZ):
 
     def get_meta_changes(self, commit_hash: str, current_file: str) -> Set[str]:
         meta_changes = set()
-        repo_mining = RepositoryMining(path_to_repo=self.repository_path, single=commit_hash).traverse_commits()
+        repo_mining = Repository(path_to_repo=self.repository_path, single=commit_hash).traverse_commits()
         for commit in repo_mining:
             show_str = self.repository.git.show(commit.hash, '--summary').splitlines()
             if show_str and self._is_git_mode_change(show_str, current_file):
@@ -52,7 +52,7 @@ class MASZZ(AGSZZ):
 
     def get_merge_commits(self, commit_hash: str) -> Set[str]:
         merge = set()
-        repo_mining = RepositoryMining(single=commit_hash, path_to_repo=self.repository_path).traverse_commits()
+        repo_mining = Repository(single=commit_hash, path_to_repo=self.repository_path).traverse_commits()
         for commit in repo_mining:
             try:
                 if commit.merge:

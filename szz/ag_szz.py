@@ -3,7 +3,7 @@ import traceback
 from typing import List, Set
 from time import time as ts
 from git import Commit
-from pydriller import RepositoryMining
+from pydriller import Repository
 
 from ..szz.core.abstract_szz import AbstractSZZ, ImpactedFile
 
@@ -18,7 +18,7 @@ class AGSZZ(AbstractSZZ):
 
     def _exclude_commits_by_change_size(self, commit_hash: str, max_change_size: int = 20) -> Set[str]:
         to_exclude = set()
-        repo_mining = RepositoryMining(self.repository_path, to_commit=commit_hash, order='reverse').traverse_commits()
+        repo_mining = Repository(self.repository_path, to_commit=commit_hash, order='reverse').traverse_commits()
         for commit in repo_mining:
             try:
                 if len(commit.modifications) > max_change_size:
