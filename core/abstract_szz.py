@@ -65,10 +65,10 @@ class AbstractSZZ(ABC):
 
         self._repository = Repo(self._repository_path)
 
-    # def __del__(self):
-    #     log.info("cleanup objects...")
-    #     # self.__clear_gitpython()
-    #     # self.__cleanup_repo()
+    def __del__(self):
+        log.info("cleanup objects...")
+        self.__clear_gitpython()
+        self.__cleanup_repo()
 
     @property
     def repository(self) -> Repo:
@@ -281,9 +281,9 @@ class AbstractSZZ(ABC):
 
     def __cleanup_repo(self):
         """ Cleanup of local repository used by SZZ """
-        # if os.path.isdir(self.__temp_dir):
-        #     #self.del_rw(lambda *args: None, self.__temp_dir, None)
-        #     rmtree(self.__temp_dir, onerror=self.del_rw)
+        if os.path.isdir(self.__temp_dir):
+            #self.del_rw(lambda *args: None, self.__temp_dir, None)
+            rmtree(self.__temp_dir, onerror=self.del_rw)
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """
