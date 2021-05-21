@@ -10,7 +10,7 @@ from typing import List, Set
 from tempfile import mkdtemp
 
 from git import Commit, Repo
-from pydriller import ModificationType, Git as PyDrillerGitRepo
+from pydriller import ModificationType, Repository, Git as PyDrillerGitRepo
 
 from .comment_parser import parse_comments
 
@@ -65,10 +65,10 @@ class AbstractSZZ(ABC):
 
         self._repository = Repo(self._repository_path)
 
-    def __del__(self):
-        log.info("cleanup objects...")
-        self.__clear_gitpython()
-        self.__cleanup_repo()
+    # def __del__(self):
+    #     log.info("cleanup objects...")
+    #     # self.__clear_gitpython()
+    #     # self.__cleanup_repo()
 
     @property
     def repository(self) -> Repo:
@@ -116,7 +116,8 @@ class AbstractSZZ(ABC):
         """
         impacted_files = list()
 
-        fix_commit = PyDrillerGitRepo(self.repository_path).get_commit(fix_commit_hash)
+        # fix_commit = PyDrillerGitRepo(self.repository_path).get_commit(fix_commit_hash)
+        fix_commit = next(Repository(self.repository_path, single=fix_commit_hash).traverse_commits())
         for mod in fix_commit.modified_files:
             # skip newly added files
             if not mod.old_path:
