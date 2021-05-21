@@ -286,8 +286,9 @@ class AbstractSZZ(ABC):
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """
-        self._repository.close()
-        self._repository.__del__()
+        if hasattr(self, "_repository"):
+            self._repository.close()
+            self._repository.__del__()
 
 
 class ImpactedFile:

@@ -158,3 +158,5 @@ modules.xml
 
 temp/
 __pycache__
+
+repos_test\*
