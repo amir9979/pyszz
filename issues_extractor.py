@@ -116,6 +116,7 @@ class CommittedFile(object):
             self.insertions = 0
             self.deletions = 0
         self.is_java = self.name.endswith(".java")
+        self.is_test = 'test' in self.name
 
 
 def _get_commits_files(repo):
@@ -150,28 +151,11 @@ class Commit(object):
         else:
             self.issue_type = ''
         self.is_java_commit = is_java_commit
-
-    def is_bug(self):
-        return self._issue_id != '0' and self.issue_type == 'bug'
-
-    def get_issue_url(self):
-        if self.issue:
-            return self.issue.url
-        return ""
-
-    def get_commit_methods(self):
-        if self.is_bug():
-            if len(self._methods) == 0:
-                self._methods = get_commit_methods(self._repo_dir, self._commit_id, analyze_source_lines=False)
-        return self._methods
+        self.is_all_tests = all(list(map(lambda x: not x.is_test, self._files)))
 
     @classmethod
-    def init_commit_by_git_commit(cls, git_commit, bug_id=0, issue=None, files=None, is_java_commit=True):
+    def init_commit_by_git_commit(cls, git_commit, bug_id='0', issue=None, files=None, is_java_commit=True):
         return Commit(bug_id, git_commit, issue, files=files, is_java_commit=is_java_commit)
-
-    def to_list(self):
-        return [self._commit_id, str(self._issue_id), ";".join(list(map(lambda x: x.name, self._files)))]
-
 
 
 def _commits_and_issues(repo, jira_issues):
@@ -219,15 +203,23 @@ def _commits_and_issues(repo, jira_issues):
             Commit.init_commit_by_git_commit(git_commit, bug_id, issues.get(bug_id), java_commits[commit_sha]))
     return commits
 
-def extract_json(repo_path, jira_key, repo_full_name, out_json):
+
+def extract_json(repo_path, jira_key, repo_full_name, out_json, out_non_tests_json):
     issues = get_jira_issues(jira_key)
     commits = _commits_and_issues(git.Repo(repo_path), issues)
+    save_to_json(commits, repo_full_name, out_json)
+    save_to_json(list(filter(lambda x: not x.is_all_tests, commits)), repo_full_name, out_non_tests_json)
+
+
+def save_to_json(commits, repo_full_name, out_json):
     issued_ = list(filter(lambda c: c.issue is not None, commits))
     buggy = list(filter(lambda c: c.issue.type.lower() == 'bug', issued_))
-    bugs_json = list(map(lambda c: {"repo_name":repo_full_name, 'fix_commit_hash': c._commit_id, "earliest_issue_date": c.issue.creation_time.strftime("%Y-%m-%dT%H:%M:%SZ")}, buggy))
+    bugs_json = list(map(lambda c: {"repo_name": repo_full_name, 'fix_commit_hash': c._commit_id,
+                                    "earliest_issue_date": c.issue.creation_time.strftime("%Y-%m-%dT%H:%M:%SZ")},
+                         buggy))
     with open(out_json, 'w') as out:
         json.dump(bugs_json, out)
 
 
 if __name__ == "__main__":
-    extract_json(r"c:\temp\camel2", "CAMEL", 'apache/camel', 'camel_bugfixes.json')
+    extract_json(r"c:\temp\camel2", "CAMEL", 'apache/camel', 'camel_bugfixes.json', 'camel_non_tests_bugfixes.json')
