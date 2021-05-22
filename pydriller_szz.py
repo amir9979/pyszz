@@ -13,6 +13,8 @@ def pydriller_szz(git_path, bugsfixes_json, results_path):
         bic[a['fix_commit_hash']] = {}
         c = next(Repository(git_path, single=a['fix_commit_hash']).traverse_commits())
         for f in c.modified_files:
+            if f.new_path is None:
+                continue
             if '\\test\\' in f.new_path or not f.new_path.endswith('.java'):
                 continue
             ans = g.get_commits_last_modified_lines(c, f)
@@ -32,4 +34,5 @@ def pydriller_szz(git_path, bugsfixes_json, results_path):
 
 
 if __name__ == "__main__":
-    pydriller_szz(r"C:\Temp\checkouts\apache\camel", r"C:\Users\User\Documents\GitHub\pyszz\camel_bugfixes.json", r"c:\temp\pydriller_camle_bic")
+    pydriller_szz(r"C:\Temp\checkouts\apache\camel", r"C:\Users\User\Documents\GitHub\pyszz\camel_bugfixes.json", r"c:\temp\pydriller_camel_bic")
+    pydriller_szz(r"C:\Temp\checkouts\apache\camel", r"C:\Users\User\Documents\GitHub\pyszz\camel_non_tests_bugfixes.json", r"c:\temp\pydriller_camel_non_tests_bic")

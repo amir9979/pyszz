@@ -207,8 +207,11 @@ def _commits_and_issues(repo, jira_issues):
 def extract_json(repo_path, jira_key, repo_full_name, out_json, out_non_tests_json):
     issues = get_jira_issues(jira_key)
     commits = _commits_and_issues(git.Repo(repo_path), issues)
-    save_to_json(commits, repo_full_name, out_json)
-    save_to_json(list(filter(lambda x: not x.is_all_tests, commits)), repo_full_name, out_non_tests_json)
+    # save_to_json(commits, repo_full_name, out_json)
+    # save_to_json(list(filter(lambda x: not x.is_all_tests, commits)), repo_full_name, out_non_tests_json)
+    to_many_files = list(filter(lambda x: len(x._files) < 6, commits))
+    save_to_json(to_many_files, repo_full_name, out_json)
+    save_to_json(list(filter(lambda x: not x.is_all_tests, to_many_files)), repo_full_name, out_non_tests_json)
 
 
 def save_to_json(commits, repo_full_name, out_json):
