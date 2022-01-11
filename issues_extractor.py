@@ -118,6 +118,9 @@ class CommittedFile(object):
         self.is_java = self.name.endswith(".java")
         self.is_test = 'test' in self.name
 
+    def get_values(self):
+        return {'commit_sha': self.sha, 'file_name': self.name, 'is_java': self.is_java, 'is_test': self.is_test, 'added_lines': self.insertions, 'deleted_lines': self.deletions}
+
 
 def _get_commits_files(repo):
     data = repo.git.log('--numstat','--pretty=format:"sha: %H"').split("sha: ")
@@ -131,6 +134,21 @@ def _get_commits_files(repo):
             names = fix_renamed_files([name])
             comms[commit_sha].extend(list(map(lambda n: CommittedFile(commit_sha, n, insertions, deletions), names)))
     return dict(map(lambda x: (x, comms[x]), filter(lambda x: comms[x], comms)))
+
+
+def _get_commits_files_status(repo):
+    data = repo.git.log('--name-status','--pretty=format:"sha: %H"').split("sha: ")
+    ans = []
+    for d in data[1:]:
+        d = d.replace('"', '').replace('\n\n', '\n').split('\n')
+        commit_sha = d[0]
+        #comms[commit_sha] = []
+        for x in d[1:-1]:
+            file_status = x.split('\t')
+            modification_type = file_status[0][0]
+            names = file_status[1:]
+            ans.extend(list(map(lambda n: (commit_sha, n, modification_type), filter(lambda x: x.endswith('.java'), names))))
+    return ans
 
 
 class Commit(object):
@@ -225,4 +243,17 @@ def save_to_json(commits, repo_full_name, out_json):
 
 
 if __name__ == "__main__":
-    extract_json(r"c:\temp\camel2", "CAMEL", 'apache/camel', 'camel_bugfixes.json', 'camel_non_tests_bugfixes.json')
+    import git
+    from functools import reduce
+    import pandas as pd
+    d = _get_commits_files_status(git.Repo(r"c:\temp\camel2"))
+    changes = []
+    for c in _get_commits_files(git.Repo(r"c:\temp\camel2")).values():
+        for f in c:
+            changes.append(f.get_values())
+    d2 = pd.DataFrame(changes)
+    d2.to_csv(r"c:\temp\committed.csv", index=False)
+    modifications = pd.DataFrame(d, columns=['commit_sha', 'file_name', 'modification_type'])
+    modifications.to_csv(r"c:\temp\modifications.csv", index=False)
+    modifications.merge(d2, on= ['commit_sha', 'file_name']).to_csv(r"c:\temp\all.csv", index=False)
+    # extract_json(r"c:\temp\camel2", "CAMEL", 'apache/camel', 'camel_bugfixes.json', 'camel_non_tests_bugfixes.json')
