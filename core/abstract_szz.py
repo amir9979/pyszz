@@ -8,7 +8,7 @@ from enum import Enum
 from shutil import rmtree
 from typing import List, Set
 from tempfile import mkdtemp
-
+import traceback
 from git import Commit, Repo
 from pydriller import ModificationType, Repository, Git as PyDrillerGitRepo
 
@@ -48,6 +48,8 @@ class AbstractSZZ(ABC):
         :param str repo_url: url of the Git repository to clone
         :param str repos_dir: temp folder where to clone the given repo
         """
+        self._repository = None
+
         self.max_file_modifications: int = 50 # max lines that are changed in a file; Beware modifications are counted as 2 (addition + removal)
         self.__temp_dir = os.path.join(repos_dir, repo_full_name)
         self._repository_path = os.path.join(self.__temp_dir, repo_full_name.replace('/', '_'))
@@ -141,7 +143,7 @@ class AbstractSZZ(ABC):
                 mod_lines = lines_deleted
             else:
                 mod_lines = [ld for ld in lines_deleted if ld in lines_added]
-            
+
             if len(mod_lines) > self.max_file_modifications:
                 log.warning("File changes too large")
                 continue
@@ -287,9 +289,8 @@ class AbstractSZZ(ABC):
 
     def __clear_gitpython(self):
         """ Cleanup of GitPython due to memory problems """
-        if hasattr(self, "_repository"):
-            self._repository.close()
-            self._repository.__del__()
+        self._repository.close()
+        self._repository.__del__()
 
 
 class ImpactedFile:
